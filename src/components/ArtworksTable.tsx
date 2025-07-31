@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { InputSwitch } from 'primereact/inputswitch';
@@ -18,43 +18,7 @@ interface Artwork {
     date_end: string | null;
 }
 
-interface SelectedArtworksPanelProps {
-    selectedItems: Artwork[];
-    onRemoveItem?: (id: number) => void;
-}
 
-const SelectedArtworksPanel = ({ selectedItems, onRemoveItem }: SelectedArtworksPanelProps) => {
-    if (!selectedItems?.length) {
-        return <div className="card mt-3"><p>No artworks selected.</p></div>;
-    }
-    
-    return (
-        <div className="card mt-3">
-            <h3>Selected Artworks ({selectedItems.length})</h3>
-            <ul style={{ listStyleType: 'none', padding: 0 }}>
-                {selectedItems.map(item => (
-                    <li key={item.id} style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between', 
-                        padding: '8px 0', 
-                        borderBottom: '1px solid #eee' 
-                    }}>
-                        <span>{item.title} - {item.artist_display}</span>
-                        {onRemoveItem && (
-                            <Button
-                                icon="pi times"
-                                className="p-button-rounded p-button-text p-button-sm p-ml-auto"
-                                onClick={() => onRemoveItem(item.id)}
-                                aria-label={`Remove ${item.title}`}
-                            />
-                        )}
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-};
 
 
 const ArtworksTable = () => {
@@ -261,7 +225,7 @@ const ArtworksTable = () => {
 
     }, []);
 
-    const onLazyLoad = (event: any) => {
+    const onLazyLoad = (event: { first: number; rows: number }) => {
         console.log("[onLazyLoad] Event received:", event);
         const newPage = Math.floor(event.first / event.rows) + 1;
 
@@ -305,8 +269,11 @@ const ArtworksTable = () => {
                 </div>
             )}
 
-            {console.log("--- DataTable Render ---")}
-            {console.log(`DataTable Props: totalRecords=${totalRecords}, rows=${lazyState.rows}, first=${lazyState.first}`)}
+            {(() => {
+                console.log("--- DataTable Render ---");
+                console.log(`DataTable Props: totalRecords=${totalRecords}, rows=${lazyState.rows}, first=${lazyState.first}`);
+                return null;
+            })()}
 
             {totalRecords > 0 || loading ? (
                 <DataTable
@@ -318,7 +285,7 @@ const ArtworksTable = () => {
                     selection={selectedProducts}
                     dataKey="id"
                     selectionMode={rowClick ? null : 'multiple'}
-                    onSelectionChange={(e) => {
+                    onSelectionChange={(e: { value: Artwork[] }) => {
                         const newSelection = e.value as Artwork[];
                         const previousSelection = selectedProducts;
                         
